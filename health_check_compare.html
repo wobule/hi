@@ -74,13 +74,12 @@
   .price{font-weight:700;color:var(--accent);white-space:nowrap}
   .hidden{display:none!important}
   .checkbox{cursor:pointer;width:18px;height:18px;accent-color:var(--primary)}
-  .cart{background:var(--card);border-radius:12px;
-        box-shadow:0 2px 8px rgba(0,0,0,.08);padding:14px 18px;
-        border:2px solid var(--primary);display:flex;align-items:center;gap:16px;
-        margin-bottom:18px}
-  .cart .title{font-weight:700;color:var(--primary-dark);font-size:14px;flex-shrink:0}
-  .cart .total{font-size:24px;font-weight:800;color:var(--accent);flex-shrink:0}
-  .cart .breakdown{font-size:12px;color:var(--muted);flex:1;text-align:right}
+  .cart{background:#fffaf2;border-radius:8px;padding:8px 14px;
+        border:1.5px solid var(--accent);display:flex;align-items:center;gap:12px;
+        flex:1;min-width:260px}
+  .cart .title{font-weight:700;color:var(--primary-dark);font-size:.85rem;flex-shrink:0}
+  .cart .total{font-size:1.1rem;font-weight:800;color:var(--accent);flex-shrink:0}
+  .cart .breakdown{font-size:.72rem;color:var(--muted);flex:1;text-align:right;line-height:1.3}
   .note{background:#fff8e1;border-left:4px solid var(--accent);padding:12px 16px;
         border-radius:6px;margin-bottom:16px;font-size:13px}
   /* === 群組選擇大面板 === */
@@ -172,6 +171,13 @@
       <button class="seg" style="padding:8px 14px;background:#fff;cursor:pointer;border-radius:8px;border:1px solid var(--border)" onclick="expandAll(true)">全部展開</button>
       <button class="seg" style="padding:8px 14px;background:#fff;cursor:pointer;border-radius:8px;border:1px solid var(--border)" onclick="expandAll(false)">全部收合</button>
     </div>
+    <div class="control-row">
+      <div class="cart">
+        <div class="title">🧺 試算</div>
+        <div class="total" id="cartTotal">$6,500</div>
+        <div class="breakdown" id="cartBreak">主套檢 $6,500 + 加選 $0</div>
+      </div>
+    </div>
     <div class="legend">
       <span><span class="badge b-incl">已含</span>主套檢免費</span>
       <span><span class="badge b-group">群組選</span>套檢內 N 擇 1</span>
@@ -181,12 +187,6 @@
   </div>
 
   <div class="summary" id="summary"></div>
-
-  <div class="cart">
-    <div class="title">🧺 加選試算</div>
-    <div class="total" id="cartTotal">$6,500</div>
-    <div class="breakdown" id="cartBreak">主套檢 $6,500 + 加選 $0</div>
-  </div>
 
   <div class="picker" id="picker"></div>
 
