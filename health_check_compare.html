@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>艾昆緯 115-116 年度健檢方案比較</title>
+<style>
+  :root{
+    --primary:#2c7a4b;--primary-dark:#1f5a37;--accent:#e07b00;
+    --bg:#f5f7f5;--card:#fff;--border:#dde3dd;--text:#222;--muted:#666;
+    --male:#2563eb;--female:#db2777;--both:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+       margin:0;padding:0;background:var(--bg);color:var(--text);line-height:1.6}
+  header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+         color:#fff;padding:24px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  header h1{margin:0 0 6px;font-size:22px}
+  header p{margin:4px 0;font-size:13px;opacity:.9}
+  .container{max-width:1280px;margin:0 auto;padding:20px}
+  .controls{background:var(--card);border-radius:10px;padding:18px;margin-bottom:18px;
+            box-shadow:0 1px 4px rgba(0,0,0,.05);position:sticky;top:0;z-index:10}
+  .control-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:10px}
+  .control-row:last-child{margin-bottom:0}
+  .label{font-weight:600;color:var(--primary-dark);margin-right:6px}
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .seg button{background:#fff;border:none;padding:8px 14px;cursor:pointer;font-size:14px;
+              border-right:1px solid var(--border);transition:all .15s}
+  .seg button:last-child{border-right:none}
+  .seg button.active{background:var(--primary);color:#fff;font-weight:600}
+  .seg button:hover:not(.active){background:#eef4ee}
+  .search{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);
+          border-radius:8px;font-size:14px}
+  .summary{background:var(--card);border-radius:10px;padding:18px;margin-bottom:18px;
+           box-shadow:0 1px 4px rgba(0,0,0,.05);display:grid;
+           grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .stat{text-align:center;padding:10px;border-right:1px solid var(--border)}
+  .stat:last-child{border-right:none}
+  .stat .v{font-size:24px;font-weight:700;color:var(--primary)}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .stat.price .v{color:var(--accent)}
+  .category{background:var(--card);border-radius:10px;margin-bottom:14px;
+            box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden}
+  .cat-head{padding:12px 18px;background:#eef4ee;cursor:pointer;
+            display:flex;justify-content:space-between;align-items:center;
+            border-left:4px solid var(--primary)}
+  .cat-head h3{margin:0;font-size:16px;color:var(--primary-dark)}
+  .cat-head .count{font-size:12px;color:var(--muted)}
+  .cat-body{display:none}
+  .cat-body.open{display:block}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #eee;vertical-align:top}
+  th{background:#fafafa;font-size:12px;color:var(--muted);font-weight:600;
+     position:sticky;top:0}
+  tr:hover{background:#fbfdfb}
+  .item-name{font-weight:600;color:#333}
+  .item-en{color:#888;font-size:11px;display:block;margin-top:2px}
+  .purpose{color:#555;font-size:12px;max-width:340px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .b-incl{background:#dcfce7;color:#166534}
+  .b-group{background:#fef3c7;color:#92400e}
+  .b-add{background:#fee2e2;color:#991b1b}
+  .b-male{background:#dbeafe;color:#1e40af}
+  .b-female{background:#fce7f3;color:#9d174d}
+  .b-both{background:#ede9fe;color:#5b21b6}
+  .price{font-weight:700;color:var(--accent);white-space:nowrap}
+  .hidden{display:none!important}
+  .checkbox{cursor:pointer;width:18px;height:18px;accent-color:var(--primary)}
+  .cart{position:fixed;right:20px;bottom:20px;background:var(--card);border-radius:12px;
+        box-shadow:0 4px 16px rgba(0,0,0,.15);padding:14px 18px;min-width:240px;z-index:20;
+        border:2px solid var(--primary)}
+  .cart .title{font-weight:700;color:var(--primary-dark);margin-bottom:6px}
+  .cart .total{font-size:22px;font-weight:800;color:var(--accent)}
+  .cart .breakdown{font-size:12px;color:var(--muted);margin-top:4px}
+  .note{background:#fff8e1;border-left:4px solid var(--accent);padding:12px 16px;
+        border-radius:6px;margin-bottom:16px;font-size:13px}
+  .group-box{background:#fef9e7;border:1px dashed #d4a017;border-radius:8px;
+             padding:12px;margin:10px 18px}
+  .group-box .gt{font-weight:700;color:#7a5a00;margin-bottom:6px}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:4px}
+  @media (max-width:720px){
+    .stat{border-right:none;border-bottom:1px solid var(--border)}
+    .purpose{max-width:none}
+    th,td{padding:7px 6px;font-size:12px}
+    .cart{left:10px;right:10px;bottom:10px;min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>艾昆緯股份有限公司 115-116 年度健檢方案比較</h1>
+  <p>國泰健康管理 · 半日精選 $6,500 · 報價有效至 116/12/31</p>
+  <p>📍 敦南（1-9月限上午）· 內湖 / 新竹（整年度）· 下午檢 5月起</p>
+</header>
+
+<div class="container">
+
+  <div class="note">
+    <strong>💡 怎麼看這份比較？</strong><br>
+    主套檢 $6,500 已含 60+ 項固定檢查（男女皆同）+ 1 個「7 擇 1」共同群組 + 女性「2 擇 1」婦科群組。
+    下方加選項目是<b>額外付費</b>。請切換「性別 / 時段」並勾選想加選的項目，右下角會即時計算總價。
+  </div>
+
+  <div class="controls">
+    <div class="control-row">
+      <span class="label">性別</span>
+      <div class="seg" id="seg-sex">
+        <button data-v="M" class="active">👨 男性</button>
+        <button data-v="F">👩 女性</button>
+      </div>
+      <span class="label">時段</span>
+      <div class="seg" id="seg-time">
+        <button data-v="AM" class="active">上午檢</button>
+        <button data-v="PM">下午檢 (5月起)</button>
+      </div>
+      <span class="label">顯示</span>
+      <div class="seg" id="seg-filter">
+        <button data-v="all" class="active">全部</button>
+        <button data-v="incl">僅已含</button>
+        <button data-v="group">僅群組選</button>
+        <button data-v="add">僅加選</button>
+      </div>
+    </div>
+    <div class="control-row">
+      <input class="search" id="search" placeholder="🔍 搜尋項目（中文或英文，如：肝、cancer、PSA）">
+      <button class="seg" style="padding:8px 14px;background:#fff;cursor:pointer;border-radius:8px;border:1px solid var(--border)" onclick="expandAll(true)">全部展開</button>
+      <button class="seg" style="padding:8px 14px;background:#fff;cursor:pointer;border-radius:8px;border:1px solid var(--border)" onclick="expandAll(false)">全部收合</button>
+    </div>
+    <div class="legend">
+      <span><span class="badge b-incl">已含</span>主套檢免費</span>
+      <span><span class="badge b-group">群組選</span>套檢內 N 擇 1</span>
+      <span><span class="badge b-add">加選</span>需額外付費</span>
+      <span><span class="badge b-male">男</span> / <span class="badge b-female">女</span> / <span class="badge b-both">男女</span></span>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div id="content"></div>
+
+</div>
+
+<div class="cart">
+  <div class="title">🧺 加選試算</div>
+  <div class="total" id="cartTotal">$0</div>
+  <div class="breakdown" id="cartBreak">主套檢 $6,500 + 加選 $0</div>
+</div>
+
+<script>
+// ============ DATA ============
+// sex: M=男 F=女 B=男女通用
+// status fields: amM, amF, pmM, pmF -> 'incl' | 'group' | 'none'  (none = 不適用，會視為加選或不列)
+// group: '7擇1' | '女2擇1' | null
+// price: 加選費用 (有的話)
+
+const DATA = [
+  // ===== 主套檢 =====
+  {cat:"一般檢查 General",name:"身高/體重/腰圍/體脂率/理想體重/BMI",en:"Body Height/Weight/Waist/BMI",purpose:"建立身體基本資料",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"一般檢查 General",name:"身體組成分析",en:"Body Composition",purpose:"量化肌肉、皮下/內臟脂肪、水份、基礎代謝率、肥胖分析、水腫評估",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"一般檢查 General",name:"血壓 / 脈搏",en:"BP / Pulse",purpose:"建立身體基本資料",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"理學檢查",name:"理學醫師檢查",en:"Physical Examination",purpose:"醫師整體性檢查及評估",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+
+  {cat:"肺部檢查",name:"胸部X光-正面",en:"Chest X-ray PA",purpose:"篩檢肺炎、纖維化、肺結核、肺腫瘤、心臟肥大",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"肺部檢查",name:"胸部X光-左側面",en:"Chest X-ray L Lat.",purpose:"側面角度補足正面盲點",amM:'none',amF:'none',pmM:'none',pmF:'none',price:288},
+  {cat:"肺部檢查",name:"肺功能檢查",en:"Pulmonary Function Test",purpose:"評估肺活量及呼吸道通暢程度（FVC/FEV1/PEF）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:280},
+
+  {cat:"心血管 & 代謝",name:"血脂套組（三酸甘油脂/總膽固醇/HDL/LDL/比值）",en:"Lipid Profile",purpose:"心臟血管動脈硬化危險指標",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"空腹血糖",en:"Fasting Blood Sugar",purpose:"瞭解血糖、篩檢糖尿病",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"糖化血色素 HbA1c",en:"Hemoglobin A1c",purpose:"近期血糖平均值（已含於主套檢）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"高敏感性C反應蛋白",en:"hs-CRP",purpose:"心血管疾病風險（已含於主套檢）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"靜式心電圖",en:"Resting EKG",purpose:"心臟缺氧、心律不整、肥大、傳導障礙",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"周邊動脈硬化評估",en:"Atherosclerosis Assessment",purpose:"四肢動脈脈波傳導度評估血管硬化（已含於主套檢）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"十年心血管疾病風險評估",en:"10-year CVD Risk",purpose:"預測未來十年心血管疾病風險",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"心血管 & 代謝",name:"頸動脈超音波",en:"Carotid Doppler",purpose:"評估供應腦部血流的頸動脈有無硬化、狹窄",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:1600},
+  {cat:"心血管 & 代謝",name:"DXA 全身體脂肪分析",en:"Whole Body Fat DXA",purpose:"DXA 雙能量吸收儀，全身體脂肪分布",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:960},
+  {cat:"心血管 & 代謝",name:"飯後二小時血糖",en:"Postprandial 2hr",purpose:"瞭解血糖值、篩檢糖尿病",amM:'none',amF:'none',pmM:'none',pmF:'none',price:72},
+  {cat:"心血管 & 代謝",name:"飯前胰島素（含阻抗）",en:"AC Insulin",purpose:"評估胰島素分泌量",amM:'none',amF:'none',pmM:'none',pmF:'none',price:320},
+  {cat:"心血管 & 代謝",name:"同型半胱氨酸",en:"Homocysteine",purpose:"心血管疾病風險",amM:'none',amF:'none',pmM:'none',pmF:'none',price:640},
+  {cat:"心血管 & 代謝",name:"乳酸脫氫脢 LDH",en:"LDH",purpose:"細胞組織損傷指標",amM:'none',amF:'none',pmM:'none',pmF:'none',price:200},
+  {cat:"心血管 & 代謝",name:"肌酸磷酸激酶 CPK",en:"CPK",purpose:"心肌梗塞及肌肉疾病",amM:'none',amF:'none',pmM:'none',pmF:'none',price:224},
+  {cat:"心血管 & 代謝",name:"MB型肌酸磷酸激酶",en:"CPK-MB",purpose:"心肌梗塞診斷與監測",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240},
+  {cat:"心血管 & 代謝",name:"前腦排鈉利尿鈦 Pro BNP",en:"Pro BNP",purpose:"心臟衰竭早期指標",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1440},
+  {cat:"心血管 & 代謝",name:"24 小時連續心電圖",en:"24h Holter ECG",purpose:"連續心電圖儲存與評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:3360},
+  {cat:"心血管 & 代謝",name:"7 天連續心電圖",en:"7-day Holter",purpose:"連續 7 天記錄心電圖",amM:'none',amF:'none',pmM:'none',pmF:'none',price:7040},
+  {cat:"心血管 & 代謝",name:"心臟超音波",en:"2-D ECHO of Heart",purpose:"心輸出量、瓣膜結構",amM:'none',amF:'none',pmM:'none',pmF:'none',price:2800},
+  {cat:"心血管 & 代謝",name:"游離甲狀腺素 Free T4",en:"Free T4",purpose:"甲狀腺亢進/低下",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+  {cat:"心血管 & 代謝",name:"三碘甲狀腺素 T3",en:"T3",purpose:"甲狀腺亢進/低下",amM:'none',amF:'none',pmM:'none',pmF:'none',price:360},
+  {cat:"心血管 & 代謝",name:"四碘甲狀腺素 T4",en:"T4",purpose:"甲狀腺亢進/低下",amM:'none',amF:'none',pmM:'none',pmF:'none',price:360},
+  {cat:"心血管 & 代謝",name:"甲狀腺超音波",en:"Thyroid ECHO",purpose:"甲狀腺腫大、腫瘤",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1200},
+  {cat:"心血管 & 代謝",name:"皮質素 Cortisol",en:"Cortisol",purpose:"壓力性荷爾蒙",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+  {cat:"心血管 & 代謝",name:"硫酸脫氫表雄酮 DHEA-S",en:"DHEA-S",purpose:"壓力荷爾蒙平衡",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+
+  {cat:"消化系統 Digestive",name:"肝功能套組（GOT/GPT/總蛋白/白蛋白/球蛋白/γ-GT/ALP）",en:"Liver Function",purpose:"肝功能、肝炎、肝硬化、膽道",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"消化系統 Digestive",name:"膽紅素（總/直接）",en:"Bilirubin",purpose:"膽道是否阻塞、溶血",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"消化系統 Digestive",name:"胰澱粉脢 Amylase",en:"Amylase",purpose:"胰臟炎相關指標（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"消化系統 Digestive",name:"脂脢 Lipase",en:"Lipase",purpose:"胰臟炎輔助診斷",amM:'none',amF:'none',pmM:'none',pmF:'none',price:200},
+  {cat:"消化系統 Digestive",name:"糞便潛血",en:"OB EIA",purpose:"腸胃道出血：腫瘤、潰瘍、發炎",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"消化系統 Digestive",name:"上腹部超音波",en:"Upper Abdominal Sono",purpose:"肝膽胰脾腎結石/腫瘤/脂肪肝",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"消化系統 Digestive",name:"碳-13 幽門桿菌呼氣試驗",en:"13C-urea breath test",purpose:"非侵入性檢查胃部幽門桿菌",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:1200},
+  {cat:"消化系統 Digestive",name:"B肝核心抗體 Anti-HBc",en:"Anti-HBc",purpose:"是否曾感染B型肝炎",amM:'none',amF:'none',pmM:'none',pmF:'none',price:320},
+  {cat:"消化系統 Digestive",name:"C肝抗體 Anti-HCV",en:"Anti-HCV",purpose:"C 肝感染/帶原",amM:'none',amF:'none',pmM:'none',pmF:'none',price:360},
+  {cat:"消化系統 Digestive",name:"B肝表面抗原 HBsAg",en:"HBsAg",purpose:"B 肝感染/帶原",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240},
+  {cat:"消化系統 Digestive",name:"B肝表面抗體 Anti-HBs",en:"Anti-HBs",purpose:"B 肝免疫力",amM:'none',amF:'none',pmM:'none',pmF:'none',price:320},
+  {cat:"消化系統 Digestive",name:"A肝抗體 IgG",en:"Anti-HAV IgG",purpose:"曾感染A肝/疫苗評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:280},
+  {cat:"消化系統 Digestive",name:"A肝抗體 IgM",en:"Anti-HAV IgM",purpose:"目前感染A肝",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+  {cat:"消化系統 Digestive",name:"腹部X光 KUB",en:"KUB",purpose:"腸阻塞、膽結石、泌尿系統結石",amM:'none',amF:'none',pmM:'none',pmF:'none',price:360},
+  {cat:"消化系統 Digestive",name:"有感 NBI 胃鏡",en:"Panendoscopy",purpose:"食道、胃、十二指腸發炎/潰瘍/瘜肉/腫瘤",amM:'none',amF:'none',pmM:'none',pmF:'none',price:2800},
+  {cat:"消化系統 Digestive",name:"有感 AI 大腸鏡（含保可淨）",en:"Colonfibroscopy",purpose:"全段大腸、乙狀結腸、直腸瘜肉/腫瘤",amM:'none',amF:'none',pmM:'none',pmF:'none',price:5200},
+  {cat:"消化系統 Digestive",name:"麻醉-單部位",en:"Anesthesia 1 site",purpose:"靜脈注射麻醉減輕內視鏡不適",amM:'none',amF:'none',pmM:'none',pmF:'none',price:4000},
+  {cat:"消化系統 Digestive",name:"麻醉-雙部位",en:"Anesthesia 2 site",purpose:"靜脈注射麻醉（胃鏡+大腸鏡）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:5800},
+  {cat:"消化系統 Digestive",name:"腸道益生菌檢測",en:"Gut Microbiome",purpose:"腸道菌叢平衡",amM:'none',amF:'none',pmM:'none',pmF:'none',price:4000},
+
+  {cat:"腎臟泌尿",name:"腎功能套組（BUN/尿酸/Creatinine/eGFR/電解質）",en:"Renal Panel",purpose:"腎臟功能、尿酸、痛風",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"腎臟泌尿",name:"尿液常規 + 沉渣顯微鏡",en:"Urine Routine",purpose:"腎臟膀胱疾病、結石、感染、糖尿、肝膽",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"腎臟泌尿",name:"微白蛋白 + 尿中肌酸酐",en:"Microalbumin/Cr",purpose:"早期篩檢腎功能及腎絲球病變",amM:'none',amF:'none',pmM:'none',pmF:'none',price:632},
+
+  {cat:"血液系統",name:"血球計數 CBC",en:"Complete Blood Counts",purpose:"發炎、感染、貧血評估",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"血液系統",name:"白血球分類",en:"Differential Counts",purpose:"發炎、感染、過敏、血癌",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"血液系統",name:"血型 + Rh",en:"Blood Type + Rh",purpose:"血型及RH因子",amM:'none',amF:'none',pmM:'none',pmF:'none',price:152},
+  {cat:"血液系統",name:"G6PD（蠶豆症）",en:"G6PD",purpose:"蠶豆症篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240},
+  {cat:"血液系統",name:"血紅素電泳",en:"Hb Electrophoresis",purpose:"地中海型貧血篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240},
+  {cat:"血液系統",name:"血清鐵 + TIBC",en:"Iron / TIBC",purpose:"貧血原因診斷",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240},
+  {cat:"血液系統",name:"血中鉛 Pb",en:"Lead",purpose:"重金屬濃度",amM:'none',amF:'none',pmM:'none',pmF:'none',price:384},
+  {cat:"血液系統",name:"汞 Hg",en:"Mercury",purpose:"重金屬濃度",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+  {cat:"血液系統",name:"砷 As",en:"Arsenic",purpose:"重金屬濃度",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+
+  {cat:"腫瘤標記 Tumor",name:"甲種胎兒蛋白 AFP",en:"Alpha-fetoprotein",purpose:"肝癌篩檢（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"腫瘤標記 Tumor",name:"癌胚胎抗原 CEA",en:"CEA",purpose:"大腸癌、消化道癌篩檢（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"腫瘤標記 Tumor",name:"CA 19-9",en:"CA19-9",purpose:"胰臟癌、膽道癌（主套檢：男已含；女需加選）",amM:'incl',amF:'none',pmM:'incl',pmF:'none',price:480,sex:'M'},
+  {cat:"腫瘤標記 Tumor",name:"前列腺特異抗原 PSA",en:"PSA",purpose:"攝護腺病變（主套檢：男已含）",amM:'incl',amF:'none',pmM:'incl',pmF:'none',price:400,sex:'M'},
+  {cat:"腫瘤標記 Tumor",name:"游離 PSA",en:"Free PSA",purpose:"攝護腺病變進階",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480,sex:'M'},
+  {cat:"腫瘤標記 Tumor",name:"CA 125",en:"CA 125",purpose:"女性生殖器癌（卵巢癌）（主套檢：女已含）",amM:'none',amF:'incl',pmM:'none',pmF:'incl',price:480,sex:'F'},
+  {cat:"腫瘤標記 Tumor",name:"CA 15-3",en:"CA 15-3",purpose:"乳癌篩檢參考",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480,sex:'F'},
+  {cat:"腫瘤標記 Tumor",name:"CYFRA 21-1",en:"CYFRA 21-1",purpose:"非小細胞肺癌（套檢內 7 擇 1）",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:800},
+  {cat:"腫瘤標記 Tumor",name:"神經特異烯醇酶 NSE",en:"NSE",purpose:"小細胞肺癌",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+  {cat:"腫瘤標記 Tumor",name:"CA 72-4",en:"CA 72-4",purpose:"胃癌篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+  {cat:"腫瘤標記 Tumor",name:"EB 病毒抗體",en:"E-B VCA IgA",purpose:"鼻咽癌高危險群",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+  {cat:"腫瘤標記 Tumor",name:"鱗狀細胞癌抗原 SCC",en:"SCC antigen",purpose:"子宮頸癌、肺癌、頭頸部癌",amM:'none',amF:'none',pmM:'none',pmF:'none',price:640},
+  {cat:"腫瘤標記 Tumor",name:"β-HCG",en:"β-HCG",purpose:"絨毛膜癌（膀胱、睪丸）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+
+  {cat:"婦科 Gynecology",name:"婦科超音波",en:"Gynecological ECHO",purpose:"子宮、卵巢腫瘤（女2擇1群組）",amM:'none',amF:'group',pmM:'none',pmF:'group',group:'女2擇1',price:800,sex:'F'},
+  {cat:"婦科 Gynecology",name:"子宮頸抹片 Pap",en:"Pap smear",purpose:"子宮頸細胞病變",amM:'none',amF:'none',pmM:'none',pmF:'none',price:360,sex:'F'},
+  {cat:"婦科 Gynecology",name:"新柏式超薄抹片",en:"Thin PREP",purpose:"電腦超薄子宮頸抹片",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1200,sex:'F'},
+  {cat:"婦科 Gynecology",name:"人類乳突病毒 HPV",en:"HPV Test",purpose:"子宮頸癌風險評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1760,sex:'F'},
+
+  {cat:"女性乳房",name:"乳房超音波",en:"Breast ECHO",purpose:"超音波檢查乳房異常",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1600,sex:'F'},
+  {cat:"女性乳房",name:"乳房攝影",en:"Mammography",purpose:"X光篩檢鈣化、腫瘤（建議40歲以上）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1600,sex:'F'},
+  {cat:"女性乳房",name:"3D 乳房斷層攝影",en:"3D Tomosynthesis",purpose:"多角度重組，提升判讀準確率",amM:'none',amF:'none',pmM:'none',pmF:'none',price:3600,sex:'F'},
+
+  {cat:"男性醫學",name:"睪丸素酮 Testosterone",en:"Testosterone",purpose:"男性荷爾蒙；女性多囊性卵巢評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480},
+  {cat:"男性醫學",name:"精蟲分析",en:"Semen Analysis",purpose:"精蟲數量及活動力（國泰綜合醫院）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:1850,sex:'M'},
+
+  {cat:"風濕免疫",name:"類風濕性關節炎因子 RA",en:"RA factor",purpose:"類風濕性關節炎（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"風濕免疫",name:"抗細胞核抗體 ANA",en:"ANA",purpose:"自體免疫篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:400},
+  {cat:"風濕免疫",name:"全免疫球蛋白 E",en:"Total IgE",purpose:"過敏評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:320},
+
+  {cat:"神經系統",name:"HRV 自律神經檢查",en:"HRV",purpose:"交感/副交感神經（7 擇 1 群組）",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:1120},
+
+  {cat:"脊椎骨骼",name:"頸椎X光-正側面",en:"C-spine X-ray",purpose:"頸椎骨刺、滑脫、椎間狹窄（男：主套已含；女：女2擇1）",amM:'incl',amF:'group',pmM:'incl',pmF:'incl',group:'女2擇1',price:480},
+  {cat:"脊椎骨骼",name:"左髖關節骨質密度",en:"Left Hip BMD",purpose:"骨質減少/疏鬆（7 擇 1 群組）",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:800},
+  {cat:"脊椎骨骼",name:"右髖關節骨質密度",en:"Right Hip BMD",purpose:"骨質減少/疏鬆",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+  {cat:"脊椎骨骼",name:"腰椎骨質密度",en:"Lumbar Spine BMD",purpose:"骨質減少/疏鬆",amM:'none',amF:'none',pmM:'none',pmF:'none',price:800},
+  {cat:"脊椎骨骼",name:"腰薦椎X光",en:"LS Spine X-ray",purpose:"腰椎、骨盆、髖關節疾病",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480},
+  {cat:"脊椎骨骼",name:"雙膝X光",en:"Knee X-ray",purpose:"軟骨鈣化、退化性關節炎",amM:'none',amF:'none',pmM:'none',pmF:'none',price:640},
+  {cat:"脊椎骨骼",name:"骨鈣素 N-MID",en:"Osteocalcin",purpose:"骨轉換率、骨質疏鬆前兆",amM:'none',amF:'none',pmM:'none',pmF:'none',price:560},
+
+  {cat:"眼科",name:"視力 + 辨色力",en:"Visual + Color",purpose:"視力與辨色力（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"眼科",name:"眼壓檢查",en:"Intraocular Pressure",purpose:"早期篩檢青光眼（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+  {cat:"眼科",name:"眼底斷層掃瞄 OCT",en:"Optical Coherence Tomography",purpose:"視網膜、脈絡膜、視神經乳頭病變（7擇1）",amM:'group',amF:'group',pmM:'group',pmF:'group',group:'7擇1',price:1200},
+
+  {cat:"耳鼻喉",name:"聽力檢查",en:"Hearing Test 500-4000Hz",purpose:"基礎聽力（主套檢已含）",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+
+  {cat:"感染篩檢",name:"愛滋 Anti-HIV",en:"Anti-HIV (EIA)",purpose:"愛滋病篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:320},
+  {cat:"感染篩檢",name:"梅毒血清",en:"STS",purpose:"梅毒篩檢",amM:'none',amF:'none',pmM:'none',pmF:'none',price:80},
+  {cat:"感染篩檢",name:"水痘抗體 IgG",en:"Varicella IgG",purpose:"水痘抗體/疫苗評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:280,sex:'F'},
+  {cat:"感染篩檢",name:"德國麻疹抗體",en:"Rubella IgG",purpose:"德國麻疹抗體/疫苗評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:240,sex:'F'},
+  {cat:"感染篩檢",name:"麻疹抗體",en:"Measles IgG",purpose:"麻疹抗體/疫苗評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:192},
+
+  {cat:"營養素",name:"維生素 D",en:"25-OH Vit D",purpose:"鈣磷恆定、骨質疏鬆/骨折相關",amM:'none',amF:'none',pmM:'none',pmF:'none',price:640},
+  {cat:"營養素",name:"維他命 B12",en:"Vitamin B12",purpose:"水溶性維生素缺乏評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480},
+  {cat:"營養素",name:"葉酸",en:"Folic acid",purpose:"水溶性維生素，貧血評估",amM:'none',amF:'none',pmM:'none',pmF:'none',price:480},
+
+  {cat:"基因檢測",name:"男性常見癌症基因",en:"Male Cancer Genetic",purpose:"結直腸/肝/肺/食道/胃/胰/攝護腺/甲狀腺/鼻咽癌",amM:'none',amF:'none',pmM:'none',pmF:'none',price:8000,sex:'M'},
+  {cat:"基因檢測",name:"代謝症候群基因",en:"Metabolic Genetic",purpose:"中風、動脈粥狀硬化、高血壓、糖尿病、家族高膽固醇",amM:'none',amF:'none',pmM:'none',pmF:'none',price:8000},
+  {cat:"基因檢測",name:"退化性疾病基因",en:"Degenerative Genetic",purpose:"失智、阿茲海默、巴金森氏症",amM:'none',amF:'none',pmM:'none',pmF:'none',price:8000},
+
+  {cat:"影像醫學",name:"肺部低劑量電腦斷層",en:"Low-dose Lung CT",purpose:"早期肺癌篩檢最佳利器",amM:'none',amF:'none',pmM:'none',pmF:'none',price:6500},
+  {cat:"影像醫學",name:"冠狀動脈鈣化積分 CT",en:"Coronary Calcium CT",purpose:"心臟冠狀動脈鈣化、心肌梗塞風險（建議40+）",amM:'none',amF:'none',pmM:'none',pmF:'none',price:6500},
+  {cat:"影像醫學",name:"640 切冠狀動脈電腦斷層造影",en:"3D Cardiac CTA",purpose:"3D 冠狀動脈分枝、硬化/狹窄/阻塞",amM:'none',amF:'none',pmM:'none',pmF:'none',price:25000},
+  {cat:"影像醫學",name:"單部位 MRI",en:"Single-site MRI",purpose:"單部位腫瘤、發炎、損傷、退化",amM:'none',amF:'none',pmM:'none',pmF:'none',price:10000},
+  {cat:"影像醫學",name:"全脊椎 MRI",en:"Whole Spine MRI",purpose:"脊椎狹窄、骨刺、椎間盤突出、滑脫",amM:'none',amF:'none',pmM:'none',pmF:'none',price:19800},
+  {cat:"影像醫學",name:"腦部 MRI + 腦頸動脈 MRA",en:"Head MRI + MRA",purpose:"腦血管狹窄/阻塞、腦瘤、血管瘤、腦萎縮",amM:'none',amF:'none',pmM:'none',pmF:'none',price:22000},
+  {cat:"影像醫學",name:"全身 MRI + 肺 CT",en:"Whole Body MRI + Lung CT",purpose:"全身七部位 + 肺部",amM:'none',amF:'none',pmM:'none',pmF:'none',price:42000},
+  {cat:"影像醫學",name:"全身 MRI + 腦頸動脈 MRA",en:"Whole Body MRI + MRA",purpose:"全身七部位 + 腦血管",amM:'none',amF:'none',pmM:'none',pmF:'none',price:48000},
+  {cat:"影像醫學",name:"全身正子/電腦斷層 PET/CT",en:"Whole Body PET/CT",purpose:"全身癌症篩檢、分期、追蹤",amM:'none',amF:'none',pmM:'none',pmF:'none',price:33000},
+
+  {cat:"其他",name:"精緻早餐 + 健康管理服務",en:"Meal + Service",purpose:"檢查前後說明服務",amM:'incl',amF:'incl',pmM:'incl',pmF:'incl'},
+];
+
+// ============ STATE ============
+let state = {sex:'M', time:'AM', filter:'all', search:''};
+let checked = new Set();
+
+// ============ HELPERS ============
+function getStatus(item){
+  const key = state.time + state.sex;
+  return item[key] || 'none';
+}
+function isAvailableForSex(item){
+  if(!item.sex) return true;
+  return item.sex === state.sex;
+}
+
+// ============ RENDER ============
+function render(){
+  const root = document.getElementById('content');
+  const q = state.search.toLowerCase().trim();
+  const groups = {};
+  let stats = {incl:0, group:0, add:0, addPriceSum:0, total:0};
+
+  DATA.forEach((it, idx) => {
+    if(!isAvailableForSex(it)) return;
+    const st = getStatus(it);
+    // filter
+    if(state.filter === 'incl' && st !== 'incl') return;
+    if(state.filter === 'group' && st !== 'group') return;
+    if(state.filter === 'add' && st !== 'none') return;
+    // search
+    if(q && !(it.name.toLowerCase().includes(q) || (it.en||'').toLowerCase().includes(q) || it.purpose.toLowerCase().includes(q))) return;
+
+    if(!groups[it.cat]) groups[it.cat] = [];
+    groups[it.cat].push({...it, _idx: idx, _status: st});
+
+    if(st==='incl') stats.incl++;
+    else if(st==='group') stats.group++;
+    else { stats.add++; if(it.price) stats.addPriceSum += it.price; }
+    stats.total++;
+  });
+
+  // summary
+  document.getElementById('summary').innerHTML = `
+    <div class="stat price"><div class="v">$6,500</div><div class="l">主套檢費用（半日精選）</div></div>
+    <div class="stat"><div class="v">${stats.incl}</div><div class="l">已含項目</div></div>
+    <div class="stat"><div class="v">${stats.group}</div><div class="l">群組可選</div></div>
+    <div class="stat"><div class="v">${stats.add}</div><div class="l">可加選項目</div></div>
+    <div class="stat price"><div class="v">$${stats.addPriceSum.toLocaleString()}</div><div class="l">全部加選若全勾</div></div>
+  `;
+
+  // body
+  let html = '';
+  const catOrder = ["一般檢查 General","理學檢查","肺部檢查","心血管 & 代謝","消化系統 Digestive",
+    "腎臟泌尿","血液系統","腫瘤標記 Tumor","婦科 Gynecology","女性乳房","男性醫學",
+    "風濕免疫","神經系統","脊椎骨骼","眼科","耳鼻喉","感染篩檢","營養素","基因檢測","影像醫學","其他"];
+
+  catOrder.forEach(cat => {
+    if(!groups[cat]) return;
+    const items = groups[cat];
+    // group hint
+    const hasGroup7 = items.some(i=>i.group==='7擇1' && i._status==='group');
+    const hasGroupF = items.some(i=>i.group==='女2擇1' && i._status==='group');
+    html += `<div class="category">
+      <div class="cat-head" onclick="this.nextElementSibling.classList.toggle('open');this.nextElementSibling.nextElementSibling&&this.nextElementSibling.nextElementSibling.classList.toggle('open')">
+        <h3>${cat}</h3>
+        <span class="count">${items.length} 項　▾</span>
+      </div>
+      <div class="cat-body open">
+        <table>
+          <thead><tr>
+            <th style="width:30px"></th>
+            <th>檢查項目</th>
+            <th>檢查目的</th>
+            <th style="width:90px">狀態</th>
+            <th style="width:80px;text-align:right">加選價</th>
+          </tr></thead>
+          <tbody>
+          ${items.map(it=>{
+            const st = it._status;
+            const sb = st==='incl'?'<span class="badge b-incl">已含</span>'
+                      :st==='group'?`<span class="badge b-group">${it.group||'群組選'}</span>`
+                      :'<span class="badge b-add">加選</span>';
+            const sexB = it.sex==='M'?'<span class="badge b-male">男</span>'
+                       :it.sex==='F'?'<span class="badge b-female">女</span>':'';
+            const price = (st==='none' && it.price) ? `$${it.price.toLocaleString()}`
+                        : (st==='group' && it.price) ? `<span style="color:#999;font-size:11px;text-decoration:line-through">$${it.price.toLocaleString()}</span>`
+                        : '—';
+            const canCheck = st==='none' && it.price;
+            const isChecked = checked.has(it._idx);
+            return `<tr>
+              <td>${canCheck?`<input type="checkbox" class="checkbox" data-idx="${it._idx}" ${isChecked?'checked':''} onchange="toggleCheck(${it._idx},this.checked)">`:''}</td>
+              <td><span class="item-name">${it.name}</span> ${sexB}
+                  <span class="item-en">${it.en||''}</span></td>
+              <td class="purpose">${it.purpose}</td>
+              <td>${sb}</td>
+              <td style="text-align:right" class="${st==='none'&&it.price?'price':''}">${price}</td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    if(hasGroup7) html += `<div class="group-box"><div class="gt">📌 共同 7 擇 1 群組</div>本類別中標示「7擇1」的項目，與其他類別的「7擇1」項目合計，整份套檢可免費選 1 項。其餘想做的需加選付費。</div>`;
+    if(hasGroupF) html += `<div class="group-box"><div class="gt">📌 女性 2 擇 1 群組</div>女性可在「婦科超音波」與「頸椎X光」二者擇一，免費含於套檢中。</div>`;
+    html += `</div>`;
+  });
+
+  if(html==='') html = '<div style="background:#fff;padding:40px;text-align:center;border-radius:10px;color:#999">沒有符合條件的項目</div>';
+  root.innerHTML = html;
+  updateCart();
+}
+
+function toggleCheck(idx, on){
+  if(on) checked.add(idx); else checked.delete(idx);
+  updateCart();
+}
+function updateCart(){
+  let sum = 0;
+  checked.forEach(idx=>{
+    const it = DATA[idx];
+    if(it && it.price && isAvailableForSex(it) && getStatus(it)==='none') sum += it.price;
+  });
+  const total = 6500 + sum;
+  document.getElementById('cartTotal').textContent = '$' + total.toLocaleString();
+  document.getElementById('cartBreak').textContent = `主套檢 $6,500 + 加選 $${sum.toLocaleString()}（${checked.size} 項）`;
+}
+function expandAll(open){
+  document.querySelectorAll('.cat-body').forEach(b=>{
+    if(open) b.classList.add('open'); else b.classList.remove('open');
+  });
+}
+
+// ============ EVENTS ============
+function bindSeg(id, key){
+  document.querySelectorAll(`#${id} button`).forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      state[key] = b.dataset.v;
+      render();
+    };
+  });
+}
+bindSeg('seg-sex','sex');
+bindSeg('seg-time','time');
+bindSeg('seg-filter','filter');
+document.getElementById('search').oninput = e=>{state.search = e.target.value; render();};
+
+render();
+</script>
+</body>
+</html>
