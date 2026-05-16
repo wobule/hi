@@ -424,9 +424,15 @@ function render(){
   DATA.forEach((it, idx) => {
     if(!isAvailableForSex(it)) return;
     const st = getStatus(it);
+    // 群組項目已由上方面板獨立呈現，這裡不再列入分類表
+    if(st === 'group') {
+      if(st==='group') stats.group++;
+      stats.total++;
+      return;
+    }
     // filter
     if(state.filter === 'incl' && st !== 'incl') return;
-    if(state.filter === 'group' && st !== 'group') return;
+    if(state.filter === 'group') return; // 群組已獨立，不在主表
     if(state.filter === 'add' && st !== 'none') return;
     // search
     if(q && !(it.name.toLowerCase().includes(q) || (it.en||'').toLowerCase().includes(q) || it.purpose.toLowerCase().includes(q))) return;
@@ -435,7 +441,6 @@ function render(){
     groups[it.cat].push({...it, _idx: idx, _status: st});
 
     if(st==='incl') stats.incl++;
-    else if(st==='group') stats.group++;
     else { stats.add++; if(it.price) stats.addPriceSum += it.price; }
     stats.total++;
   });
@@ -458,9 +463,6 @@ function render(){
   catOrder.forEach(cat => {
     if(!groups[cat]) return;
     const items = groups[cat];
-    // group hint
-    const hasGroup7 = items.some(i=>i.group==='7擇1' && i._status==='group');
-    const hasGroupF = items.some(i=>i.group==='女2擇1' && i._status==='group');
     html += `<div class="category">
       <div class="cat-head" onclick="this.nextElementSibling.classList.toggle('open');this.nextElementSibling.nextElementSibling&&this.nextElementSibling.nextElementSibling.classList.toggle('open')">
         <h3>${cat}</h3>
@@ -505,8 +507,6 @@ function render(){
           </tbody>
         </table>
       </div>`;
-    if(hasGroup7) html += `<div class="group-box"><div class="gt">📌 此分類含「7 擇 1」項目</div>請至頁面上方「群組項目」面板選擇你要免費做的那 1 項，其它如想加做需付費。</div>`;
-    if(hasGroupF) html += `<div class="group-box"><div class="gt">📌 此分類含「女 2 擇 1」項目</div>請至頁面上方「群組項目」面板選擇。</div>`;
     html += `</div>`;
   });
 
