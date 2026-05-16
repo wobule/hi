@@ -10,8 +10,17 @@
     --male:#2563eb;--female:#db2777;--both:#7c3aed;
   }
   *{box-sizing:border-box}
+  html{font-size:16px}
+  html[data-fs="s"]{font-size:13px}
+  html[data-fs="l"]{font-size:18px}
+  html[data-fs="xl"]{font-size:20px}
   body{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
-       margin:0;padding:0;background:var(--bg);color:var(--text);line-height:1.6}
+       margin:0;padding:0;background:var(--bg);color:var(--text);line-height:1.6;
+       font-size:1rem}
+  table,th,td,.purpose,.item-en,.badge,.pp,.pprice,.pn,.breakdown,.stat .l,.legend,.note,.pick-status{font-size:inherit}
+  th,td{font-size:.82rem}
+  .item-en,.pp,.pprice,.legend,.stat .l,.cart .breakdown{font-size:.75rem}
+  .badge{font-size:.7rem}
   header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));
          color:#fff;padding:24px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
   header h1{margin:0 0 6px;font-size:22px}
@@ -149,6 +158,13 @@
         <button data-v="incl">僅已含</button>
         <button data-v="group">僅群組選</button>
         <button data-v="add">僅加選</button>
+      </div>
+      <span class="label">字體</span>
+      <div class="seg" id="seg-fs">
+        <button data-v="s">小</button>
+        <button data-v="m" class="active">中</button>
+        <button data-v="l">大</button>
+        <button data-v="xl">特大</button>
       </div>
     </div>
     <div class="control-row">
@@ -560,6 +576,15 @@ function bindSeg(id, key){
 bindSeg('seg-sex','sex');
 bindSeg('seg-time','time');
 bindSeg('seg-filter','filter');
+document.querySelectorAll('#seg-fs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#seg-fs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const v=b.dataset.v;
+    if(v==='m') document.documentElement.removeAttribute('data-fs');
+    else document.documentElement.setAttribute('data-fs', v);
+  };
+});
 document.getElementById('search').oninput = e=>{state.search = e.target.value; render();};
 
 render();
