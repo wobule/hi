@@ -336,7 +336,7 @@ let groupPick = {'7擇1': null, '女2擇1': null};
 
 // ============ HELPERS ============
 function getStatus(item){
-  const key = state.time + state.sex;
+  const key = state.time.toLowerCase() + state.sex;
   return item[key] || 'none';
 }
 function isAvailableForSex(item){
