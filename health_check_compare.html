@@ -113,6 +113,29 @@
   .pick-opt.selected .pprice::before{content:"✓ 免費含於套檢　"; color:var(--primary);font-weight:600}
   .pick-status{font-size:12px;margin-top:8px;color:var(--muted)}
   .pick-status.done{color:var(--primary);font-weight:600}
+  /* === 推薦套餐 === */
+  .packages{background:#fff;border-radius:12px;padding:18px;margin-bottom:18px;
+            box-shadow:0 2px 8px rgba(0,0,0,.08);border:2px solid #6366f1}
+  .packages h2{margin:0 0 4px;font-size:1.05rem;color:#4338ca}
+  .packages .sub{font-size:.82rem;color:var(--muted);margin-bottom:14px}
+  .pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .pkg{border:2px solid #e0e7ff;border-radius:10px;padding:12px;background:#fafbff;
+       display:flex;flex-direction:column;gap:6px;transition:all .15s}
+  .pkg:hover{border-color:#6366f1;background:#f0f4ff}
+  .pkg .pkg-name{font-weight:700;font-size:.98rem;color:#1e1b4b}
+  .pkg .pkg-desc{font-size:.82rem;color:#444;line-height:1.5;flex:1}
+  .pkg .pkg-price{font-size:1.05rem;font-weight:800;color:var(--accent)}
+  .pkg .pkg-items{font-size:.75rem;color:#666;line-height:1.4}
+  .pkg button{margin-top:6px;padding:8px;background:#6366f1;color:#fff;border:none;
+              border-radius:6px;cursor:pointer;font-weight:600;font-size:.88rem}
+  .pkg button:hover{background:#4f46e5}
+  .pkg.applied{border-color:var(--primary);background:#e8f5ec}
+  .pkg.applied button{background:var(--primary)}
+  .pkg.disabled{opacity:.45;pointer-events:none}
+  .pkg .pkg-tag{display:inline-block;font-size:.7rem;padding:1px 6px;border-radius:8px;
+                background:#fce7f3;color:#9d174d;font-weight:600}
+  .pkg .pkg-tag.m{background:#dbeafe;color:#1e40af}
+  .pkg .pkg-tag.b{background:#ede9fe;color:#5b21b6}
   .group-box{background:#fef9e7;border:1px dashed #d4a017;border-radius:8px;
              padding:12px;margin:10px 18px}
   .group-box .gt{font-weight:700;color:#7a5a00;margin-bottom:6px}
@@ -240,6 +263,8 @@
   <div class="summary" id="summary"></div>
 
   <div class="picker" id="picker"></div>
+
+  <div class="packages" id="packages"></div>
 
   <div id="content"></div>
 
@@ -399,8 +424,60 @@ const DATA = [
 // ============ STATE ============
 let state = {sex:'M', time:'AM', filter:'all', search:''};
 let checked = new Set();
-// 群組選擇：key=群組名稱, value=被選中項目的 _idx
 let groupPick = {'7擇1': null, '女2擇1': null};
+let appliedPkg = null;
+
+// 推薦套餐：用英文名匹配項目；group7/groupF 指定該族群預設的群組選擇
+const PACKAGES = [
+  {id:'basic', sex:'B', name:'小資基本款', tag:'年輕健康',
+   desc:'30 歲以下、無慢性病/家族史，預算有限。主套檢已涵蓋 60+ 項基本檢查。',
+   group7:'Carotid Doppler', groupF:'Gynecological ECHO', items:[]},
+
+  {id:'office', sex:'B', name:'30-40 上班族常規', tag:'熬夜外食',
+   desc:'長期久坐、外食、壓力大、應酬多。補強腸胃幽門桿菌與營養素缺乏。',
+   group7:'13C-urea breath test', groupF:'Gynecological ECHO',
+   items:['Lipid Profile','25-OH Vit D','Vitamin B12','Anti-HCV','HBsAg']},
+
+  {id:'man40', sex:'M', name:'40+ 男性精準篩檢', tag:'最值得加做',
+   desc:'40 歲以上男性。重點抓肺癌與心血管兩大殺手 — 兩項影像 CP 值最高。',
+   group7:'Carotid Doppler', groupF:null,
+   items:['Low-dose Lung CT','Coronary Calcium CT','13C-urea breath test']},
+
+  {id:'woman40', sex:'F', name:'40+ 女性精準篩檢', tag:'乳房+婦科',
+   desc:'40 歲以上女性。補上乳房影像、子宮頸 HPV、肺癌與心血管影像。',
+   group7:'Carotid Doppler', groupF:'Gynecological ECHO',
+   items:['3D Tomosynthesis','HPV Test','Low-dose Lung CT','Coronary Calcium CT']},
+
+  {id:'smoker', sex:'B', name:'吸菸者 / 家族肺癌', tag:'肺部全套',
+   desc:'目前吸菸或戒菸 <15 年、二手菸長期暴露、家族肺癌史。',
+   group7:'CYFRA 21-1', groupF:'Gynecological ECHO',
+   items:['Low-dose Lung CT','Pulmonary Function Test','Chest X-ray L Lat.']},
+
+  {id:'cvd', sex:'B', name:'三高 / 心血管家族史', tag:'血管全套',
+   desc:'有高血壓/高血糖/高血脂、肥胖、早發性心臟病家族史。',
+   group7:'Carotid Doppler', groupF:'Gynecological ECHO',
+   items:['Coronary Calcium CT','Homocysteine','AC Insulin + HOMA-IR','NT-proBNP']},
+
+  {id:'preg', sex:'F', name:'女性備孕 / 計畫懷孕', tag:'孕前必做',
+   desc:'準備懷孕的女性，確認感染抗體、貧血基因、子宮頸狀態。',
+   group7:'13C-urea breath test', groupF:'Gynecological ECHO',
+   items:['Rubella IgG','Varicella IgG','Hb Electrophoresis','HPV Test','Folic acid','25-OH Vit D']},
+
+  {id:'menopause', sex:'F', name:'更年期女性 (45-60)', tag:'骨鬆+婦科',
+   desc:'停經前後、易潮熱失眠、骨密度開始下降。',
+   group7:'Left Hip BMD', groupF:'Gynecological ECHO',
+   items:['Lumbar Spine BMD','3D Tomosynthesis','Free T4','25-OH Vit D','Coronary Calcium CT']},
+
+  {id:'senior', sex:'B', name:'60+ 長者全方位', tag:'退化全面',
+   desc:'60 歲以上，重點看大腦、心臟、骨鬆、退化性疾病。',
+   group7:'Left Hip BMD', groupF:'Gynecological ECHO',
+   items:['Head MRI + MRA','Coronary Calcium CT','Low-dose Lung CT','Lumbar Spine BMD','25-OH Vit D']},
+
+  {id:'premium', sex:'B', name:'高階全方位', tag:'預算充裕',
+   desc:'不在意預算，想一次做最完整檢查。包含全身 MRI 與肺 CT。',
+   group7:'Optical Coherence Tomography', groupF:'Gynecological ECHO',
+   items:['Whole Body MRI + Lung CT','HPV Test','3D Tomosynthesis']},
+];
 
 // ============ HELPERS ============
 function getStatus(item){
@@ -410,6 +487,91 @@ function getStatus(item){
 function isAvailableForSex(item){
   if(!item.sex) return true;
   return item.sex === state.sex;
+}
+
+// ============ PACKAGES ============
+function findIdxByEn(en){
+  return DATA.findIndex(it=>it.en===en);
+}
+function calcPkgPrice(pkg){
+  let sum = 6500;
+  pkg.items.forEach(en=>{
+    const idx = findIdxByEn(en);
+    if(idx<0) return;
+    const it = DATA[idx];
+    // 性別不符就跳過
+    if(it.sex && pkg.sex!=='B' && it.sex!==pkg.sex) return;
+    if(it.sex && pkg.sex==='B' && it.sex!==state.sex) return;
+    if(it.price) sum += it.price;
+  });
+  return sum;
+}
+function applyPackage(id){
+  const pkg = PACKAGES.find(p=>p.id===id);
+  if(!pkg) return;
+  // 切換性別（如需要）
+  if(pkg.sex!=='B' && pkg.sex!==state.sex){
+    state.sex = pkg.sex;
+    document.querySelectorAll('#seg-sex button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.v===pkg.sex);
+    });
+  }
+  // 清空現有選擇
+  checked.clear();
+  groupPick = {'7擇1':null,'女2擇1':null};
+  // 設定群組
+  if(pkg.group7){
+    const idx = findIdxByEn(pkg.group7);
+    if(idx>=0) groupPick['7擇1'] = idx;
+  }
+  if(pkg.groupF && state.sex==='F'){
+    const idx = findIdxByEn(pkg.groupF);
+    if(idx>=0) groupPick['女2擇1'] = idx;
+  }
+  // 勾選加選項目
+  pkg.items.forEach(en=>{
+    const idx = findIdxByEn(en);
+    if(idx<0) return;
+    const it = DATA[idx];
+    if(it.sex && it.sex!==state.sex) return;
+    checked.add(idx);
+  });
+  appliedPkg = id;
+  render();
+  // 滾到群組選擇處
+  document.getElementById('picker').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function clearPackage(){
+  checked.clear();
+  groupPick = {'7擇1':null,'女2擇1':null};
+  appliedPkg = null;
+  render();
+}
+function renderPackages(){
+  const root = document.getElementById('packages');
+  let html = `<h2>📦 推薦套餐（依族群一鍵套用）</h2>
+    <div class="sub">點下方任一套餐後，會自動設定群組選擇與勾選對應加選項目，套用後仍可手動微調。${appliedPkg?`　<a href="javascript:clearPackage()" style="color:#dc2626;font-weight:600">✕ 清除套用</a>`:''}</div>
+    <div class="pkg-grid">`;
+  PACKAGES.forEach(pkg=>{
+    // 性別不符則禁用
+    const disabled = pkg.sex!=='B' && pkg.sex!==state.sex;
+    const price = calcPkgPrice(pkg);
+    const tagCls = pkg.sex==='M'?'m':pkg.sex==='F'?'':'b';
+    const sexLbl = pkg.sex==='M'?'男':pkg.sex==='F'?'女':'男女';
+    const itemList = pkg.items.length ? pkg.items.map(en=>{
+      const idx = findIdxByEn(en);
+      return idx>=0 ? DATA[idx].name : '';
+    }).filter(Boolean).join('、') : '（只做主套檢）';
+    html += `<div class="pkg ${appliedPkg===pkg.id?'applied':''} ${disabled?'disabled':''}">
+      <div class="pkg-name">${pkg.name} <span class="pkg-tag ${tagCls}">${sexLbl} · ${pkg.tag}</span></div>
+      <div class="pkg-desc">${pkg.desc}</div>
+      <div class="pkg-items"><b>加選：</b>${itemList}</div>
+      <div class="pkg-price">約 $${price.toLocaleString()}</div>
+      <button onclick="applyPackage('${pkg.id}')">${appliedPkg===pkg.id?'✓ 已套用':'一鍵套用'}</button>
+    </div>`;
+  });
+  html += `</div>`;
+  root.innerHTML = html;
 }
 
 // ============ RENDER PICKER ============
@@ -478,11 +640,13 @@ function renderPicker(){
 
 function pickGroup(group, idx){
   groupPick[group] = idx;
+  appliedPkg = null;
   render();
 }
 
 // ============ RENDER ============
 function render(){
+  renderPackages();
   renderPicker();
   const root = document.getElementById('content');
   const q = state.search.toLowerCase().trim();
@@ -585,6 +749,8 @@ function render(){
 
 function toggleCheck(idx, on){
   if(on) checked.add(idx); else checked.delete(idx);
+  appliedPkg = null;
+  renderPackages();
   updateCart();
 }
 function updateCart(){
